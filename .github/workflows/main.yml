@@ -29,6 +29,12 @@ jobs:
         shell: sh
         run: 'bal -v'        
     -
+        name: Set release username and email
+        shell: sh
+        run: |
+              git config --global user.name tharindu1st
+              git config --global user.email ghtd.dharmarathna@gmail.com
+    -
         name: Checkout Product-APIM
         uses: actions/checkout@v3
         with:
