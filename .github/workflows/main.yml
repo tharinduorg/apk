@@ -40,9 +40,16 @@ jobs:
           path: apk-repo
           fetch_depth: '0'
     - 
-        name: Run a step if runtime-domain-service was modified
-        if: contains(steps.changed-files.outputs.all_modified_files, '**/runtime-domain-service/**')
-        run: |
-          echo "runtime-domain-service files has been modified."
-          echo "List all the files that have changed: ${{ steps.changed-files.outputs.all_modified_files }}"
-          gradle release -Prelease.useAutomaticVersion=true -Pdocker_organization=${{ secrets.DOCKER_ORGANIZATION }} -Pdocker_username=${{ secrets.DOCKER_USERNAME }} -Pdocker_password=${{ secrets.DOCKER_PASSWORD }}
+      name: List all changed files
+      run: |
+        for file in ${{ steps.changed-files.outputs.all_modified_files }}; do
+          echo "$file was changed"
+        done
+    - 
+      name: Run a step if runtime-domain-service was modified
+      if: contains(steps.changed-files.outputs.all_modified_files, '**/runtime-domain-service/**')
+      run: |
+        echo "runtime-domain-service files has been modified."
+        echo "List all the files that have changed: ${{ steps.changed-files.outputs.all_modified_files }}"
+        cd apk/runtime/runtime-domain-service
+        gradle release -Prelease.useAutomaticVersion=true -Pdocker_organization=${{ secrets.DOCKER_ORGANIZATION }} -Pdocker_username=${{ secrets.DOCKER_USERNAME }} -Pdocker_password=${{ secrets.DOCKER_PASSWORD }}
