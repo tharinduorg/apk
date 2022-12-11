@@ -41,5 +41,8 @@ jobs:
           fetch_depth: '0'
     - 
         name: Run a step if runtime-domain-service was modified
+        if: contains(steps.changed-files.outputs.all_modified_files, '**/runtime-domain-service/**')
         run: |
-            echo "List all the files that have changed: ${{ steps.changed-files.outputs.all_modified_files }}"
+          echo "runtime-domain-service files has been modified."
+          echo "List all the files that have changed: ${{ steps.changed-files.outputs.all_modified_files }}"
+          gradle release -Prelease.useAutomaticVersion=true -Pdocker_organization=${{ secrets.DOCKER_ORGANIZATION }} -Pdocker_username=${{ secrets.DOCKER_USERNAME }} -Pdocker_password=${{ secrets.DOCKER_PASSWORD }}
