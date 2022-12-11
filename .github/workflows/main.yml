@@ -11,7 +11,7 @@ jobs:
         uses: actions/cache@v3
         id: cache
         with:
-            path: /usr/lib/ballerina
+            path: '*.deb'
             key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
     -
         name: Download Ballerina distribution.
@@ -22,7 +22,6 @@ jobs:
         name: Install Ballerina distribution.
         shell: sh
         run: 'sudo dpkg -i ballerina-2201.3.0-swan-lake-linux-x64.deb'
-        if: steps.cache.outputs.cache-hit != 'true'
     -
         name: Verify Ballerina Version
         shell: sh
