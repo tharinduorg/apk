@@ -6,22 +6,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '11'
       -
         name: Download Ballerina distribution.
         shell: sh
-        run: wget 'https://dist.ballerina.io/downloads/2201.3.0/ballerina-2201.3.0-swan-lake.zip'
+        run: wget 'https://dist.ballerina.io/downloads/2201.3.0/ballerina-2201.3.0-swan-lake-linux-x64.deb'
       -
-        name: Unzip Ballerina.
+        name: Install Ballerina distribution.
         shell: sh
-        run: unzip 'ballerina-2201.3.0-swan-lake.zip'
-      -
-        name: Set PATH
-        shell: sh
-        run: 'export PATH=$PATH:/home/runner/work/apk/apk/ballerina-2201.3.0-swan-lake/bin'
+        run: 'sudo dpkg -i ballerina-2201.3.0-swan-lake-linux-x64.deb'
       -
         name: Verify Ballerina Version
         shell: sh
