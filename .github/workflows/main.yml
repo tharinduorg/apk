@@ -1,0 +1,24 @@
+on:
+  push:
+    branches:
+    - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Download Ballerina distribution.
+        shell: sh
+        run: wget 'https://dist.ballerina.io/downloads/2201.3.0/ballerina-2201.3.0-swan-lake.zip'
+      -
+        name: Unzip Ballerina.
+        shell: sh
+        run: unzip 'ballerina-2201.3.0-swan-lake.zip'
+      -
+        name: Set PATH
+        shell: sh
+        run: 'export PATH=$PATH:$pwd/ballerina-2201.3.0-swan-lake/bin'
+      -
+        name: Verify Ballerina Version
+        shell: sh
+        run: 'bal -v'        
