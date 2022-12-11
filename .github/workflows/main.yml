@@ -15,9 +15,13 @@ jobs:
         shell: sh
         run: unzip 'ballerina-2201.3.0-swan-lake.zip'
       -
+        name: Print Working Dir.
+        shell: sh
+        run: echo $PWD
+      -
         name: Set PATH
         shell: sh
-        run: 'export PATH=$PATH:ballerina-2201.3.0-swan-lake/bin'
+        run: 'export PATH=$PATH:$PWD/ballerina-2201.3.0-swan-lake/bin'
       -
         name: Verify Ballerina Version
         shell: sh
