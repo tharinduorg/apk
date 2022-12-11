@@ -2,6 +2,8 @@ on:
   push:
     branches:
     - main
+    paths:
+    - '**/runtime/runtime-domain-service'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -47,7 +49,6 @@ jobs:
         done
     - 
       name: Run a step if runtime-domain-service was modified
-      if: contains(steps.changed-files.outputs.all_modified_files, '**/runtime-domain-service/**')
       run: |
         echo "runtime-domain-service files has been modified."
         echo "List all the files that have changed: ${{ steps.changed-files.outputs.all_modified_files }}"
