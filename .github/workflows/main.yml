@@ -39,6 +39,7 @@ jobs:
         with:
           path: apk-repo
           fetch_depth: '0'
-    - name: Run a step if runtime-domain-service was modified
-      run: |
-        echo "List all the files that have changed: ${{ steps.changed-files-specific.outputs.all_modified_files }}"
+    - 
+        name: Run a step if runtime-domain-service was modified
+        run: |
+            echo "List all the files that have changed: ${{ steps.changed-files.outputs.all_modified_files }}"
