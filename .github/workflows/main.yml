@@ -3,7 +3,7 @@ on:
     branches:
     - main
     paths:
-    - '**/runtime/runtime-domain-service'
+    - '**/runtime/runtime-domain-service/**'
 jobs:
   build:
     runs-on: ubuntu-latest
