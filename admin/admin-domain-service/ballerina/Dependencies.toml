@@ -355,7 +355,7 @@ modules = [
 [[package]]
 org = "wso2"
 name = "admin_service"
-version = "0.0.1"
+version = "0.0.2-SNAPSHOT"
 dependencies = [
 	{org = "ballerina", name = "constraint"},
 	{org = "ballerina", name = "http"},
