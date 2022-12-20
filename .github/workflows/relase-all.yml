@@ -1,0 +1,102 @@
+name: "Release All Components"
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        required: true
+        type: string
+        description: "Release Version"
+      next_version:
+        type: string
+        description: "Next Development Version"
+
+jobs:
+  adapter:
+    uses: ./.github/workflows/adapter-release.yml
+    with:
+      release_version: ${{ github.event.inputs.release_version }}
+      next_version: ${{ github.event.inputs.next_version }}
+    secrets:
+      WSO2_BOT_USER: ${{ secrets.WSO2_BOT_USER }}
+      WSO2_BOT_EMAIL: ${{ secrets.WSO2_BOT_EMAIL }}
+      DOCKER_ORGANIZATION: ${{ secrets.DOCKER_ORGANIZATION }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  admin-domain-service:
+    uses: ./.github/workflows/admin-domain-service-release.yml
+    needs: adapter
+    with:
+      release_version: ${{ github.event.inputs.release_version }}
+      next_version: ${{ github.event.inputs.next_version }}
+    secrets:
+      WSO2_BOT_USER: ${{ secrets.WSO2_BOT_USER }}
+      WSO2_BOT_EMAIL: ${{ secrets.WSO2_BOT_EMAIL }}
+      DOCKER_ORGANIZATION: ${{ secrets.DOCKER_ORGANIZATION }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  backoffice-internal:
+    uses: ./.github/workflows/backoffice-internal-release.yml
+    needs: [adapter, admin-domain-service]
+    with:
+      release_version: ${{ github.event.inputs.release_version }}
+      next_version: ${{ github.event.inputs.next_version }}
+    secrets:
+      WSO2_BOT_USER: ${{ secrets.WSO2_BOT_USER }}
+      WSO2_BOT_EMAIL: ${{ secrets.WSO2_BOT_EMAIL }}
+      DOCKER_ORGANIZATION: ${{ secrets.DOCKER_ORGANIZATION }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  backoffice:
+    uses: ./.github/workflows/backoffice-release.yml
+    needs: [adapter, admin-domain-service, backoffice-internal]
+    with:
+      release_version: ${{ github.event.inputs.release_version }}
+      next_version: ${{ github.event.inputs.next_version }}
+    secrets:
+      WSO2_BOT_USER: ${{ secrets.WSO2_BOT_USER }}
+      WSO2_BOT_EMAIL: ${{ secrets.WSO2_BOT_EMAIL }}
+      DOCKER_ORGANIZATION: ${{ secrets.DOCKER_ORGANIZATION }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  devportal-domain-service:
+    uses: ./.github/workflows/devportal-domain-service-release.yml
+    needs: [adapter, admin-domain-service, backoffice-internal, backoffice]
+    with:
+      release_version: ${{ github.event.inputs.release_version }}
+      next_version: ${{ github.event.inputs.next_version }}
+    secrets:
+      WSO2_BOT_USER: ${{ secrets.WSO2_BOT_USER }}
+      WSO2_BOT_EMAIL: ${{ secrets.WSO2_BOT_EMAIL }}
+      DOCKER_ORGANIZATION: ${{ secrets.DOCKER_ORGANIZATION }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  management-server:
+    uses: ./.github/workflows/management-server-release.yml
+    needs:
+      [adapter,admin-domain-service,backoffice-internal,backoffice,devportal-domain-service]
+    with:
+      release_version: ${{ github.event.inputs.release_version }}
+      next_version: ${{ github.event.inputs.next_version }}
+    secrets:
+      WSO2_BOT_USER: ${{ secrets.WSO2_BOT_USER }}
+      WSO2_BOT_EMAIL: ${{ secrets.WSO2_BOT_EMAIL }}
+      DOCKER_ORGANIZATION: ${{ secrets.DOCKER_ORGANIZATION }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  runtime:
+    uses: ./.github/workflows/runtime-release.yml
+    needs:
+      [adapter,admin-domain-service,backoffice-internal,backoffice,devportal-domain-service,management-server]
+    with:
+      release_version: ${{ github.event.inputs.release_version }}
+      next_version: ${{ github.event.inputs.next_version }}
+    secrets:
+      WSO2_BOT_USER: ${{ secrets.WSO2_BOT_USER }}
+      WSO2_BOT_EMAIL: ${{ secrets.WSO2_BOT_EMAIL }}
+      DOCKER_ORGANIZATION: ${{ secrets.DOCKER_ORGANIZATION }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
