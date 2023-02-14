@@ -77,3 +77,4 @@ EXPOSE 9443
 USER wso2apk
 WORKDIR ${USER_HOME}
 ENTRYPOINT ["sh", "/home/wso2apk/docker-entrypoint.sh"]
+
