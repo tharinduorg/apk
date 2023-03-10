@@ -1,8 +1,7 @@
 name: Release Charts
 
 on:
-  workflow_run:
-    
+  workflow_dispatch:
 jobs:
   release:
     # depending on default permission settings for your org (contents being read-only or read-write for workloads), you will have to add permissions
