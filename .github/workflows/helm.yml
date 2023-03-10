@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - main
+env:
+  GITHUB_TOKEN: ${{ secrets.WSO2_BOT_TOKEN }}
+
 jobs:
   release:
     # depending on default permission settings for your org (contents being read-only or read-write for workloads), you will have to add permissions
