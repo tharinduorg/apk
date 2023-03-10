@@ -12,11 +12,7 @@ jobs:
     steps:
       - name: Checkout apk-repo
         uses: actions/checkout@v3
-        with:
-          fetch-depth: "0"
-          path: apk-repo
-          token: ${{ secrets.WSO2_BOT_TOKEN }}
-          
+        
       - name: Set release username and email
         shell: sh
         run: |
@@ -28,7 +24,5 @@ jobs:
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
-        with:
-           charts_dir: apk-repo/helm-charts
         env:
           CR_TOKEN: "${{ secrets.WSO2_BOT_TOKEN }}"
