@@ -46,4 +46,7 @@ subprojects {
     apply from: "$rootDir/../../common-gradle-scripts/java.gradle"
 }
 
-afterReleaseBuild.dependsOn "docker_push"
+tasks.named("afterReleaseBuild").configure {
+    dependsOn "publish"
+    finalizedBy "docker_push"
+}
