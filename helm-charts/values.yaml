@@ -18,6 +18,8 @@ wso2:
   apk:
     auth:
       enabled: true
+      enableServiceAccountCreation: true
+      enableClusterRoleCreation: true
       serviceAccountName: wso2apk-platform
       roleName: wso2apk-role
     idp:
@@ -168,6 +170,14 @@ wso2:
           replicas: 1
           imagePullPolicy: Always
           image: wso2/management-server:latest
+        # configs:
+        #   tls:
+            # certificatesSecret: "management-server-cert"
+            # fileName: "certificate.crt"
+          # adapters:
+          #   - name: adapter-1
+          #     certificatesSecret: "adapter-1-cert"
+          #     fileName: "certificate.crt"
       cnpg:
         npi: cnpg-npi
         instances: 1
@@ -179,21 +189,21 @@ wso2:
       gatewayAPI:
         enabled: true
       # controlPlane:
-      #   serviceUrl: "https://apk.org.com:9090/orgmanagement/v1"    
+      #   serviceUrl: "http://control-plane-wso2-apk-admin-ds-service.control-plane.svc.cluster.local:9444/api/am/internal/v1"    
       #   enableHostNameVerification: true
-      #   tls:
-      #     enabled: true
-      #     certificatesSecret: "organization-managetment-server-cert"
-      #     fileName: "certificate.crt"
-      #   headers:
-      #     - name: "apiKey"
-      #       value: "123-456-789"
+        # tls:
+        #   enabled: false
+        #   certificatesSecret: "organization-managetment-server-cert"
+        #   fileName: "certificate.crt"
+        # headers:
+        #   - name: "apiKey"
+        #     value: "123-456-789"
       # managementServer:
-      #   enabled: true
-      #   serviceUrl: "https://apk.org.com:9090/orgmanagement/v1"
-      #   tls:
-      #     certificatesSecret: "organization-managetment-server-cert"
-      #     fileName: "certificate.crt"
+      #   enabled: false
+      #   serviceUrl: "https://control-plane-wso2-apk-management-server.control-plane.svc.cluster.local"
+        # tls:
+        #   certificatesSecret: "organization-managetment-server-cert"
+        #   fileName: "certificate.crt"
       runtime:
         appName: "runtime-ds"
         deployment:
@@ -251,10 +261,79 @@ wso2:
           security:
             sslHostname: "adapter"
         # configs:
+          # apiNamespaces:
+          #   - "dataplane-1"
+          #   - "dataplane-2"
+          # tls:
+          #   certificatesSecret: "adapter-cert"
+          #   certKeyFilename: ""
+          #   certFilename: ""
+      ratelimiter:
+        enabled: false
+        appName: "ratelimiter"
+        deployment:
+          npi: ratelimiter-npi
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "1028Mi"
+              cpu: "1000m"
+          env:
+            HOST: 0.0.0.0
+            PORT: 8090
+            USE_STATSD: false
+            LOG_LEVEL: DEBUG
+            LIMIT_RESPONSE_HEADERS_ENABLED: false
+            REDIS_SOCKET_TYPE: tcp
+            REDIS_URL: redis-master:6379
+            REDIS_PIPELINE_WINDOW: 0.2ms
+            REDIS_PIPELINE_LIMIT: 0
+            REDIS_TLS: false
+            REDIS_TLS_CLIENT_CERT: ""
+            REDIS_TLS_CLIENT_KEY: ""
+            REDIS_TLS_CACERT: ""
+            # gRPC server
+            GRPC_HOST: 0.0.0.0
+            GRPC_PORT: 8091
+            GRPC_SERVER_USE_TLS: true
+            GRPC_SERVER_TLS_KEY: /home/wso2/security/keystore/ratelimiter.key
+            GRPC_SERVER_TLS_CERT: /home/wso2/security/keystore/ratelimiter.crt
+            GRPC_CLIENT_TLS_CACERT: /home/wso2/security/keystore/ca.crt
+            GRPC_CLIENT_TLS_SAN: localhost
+            # xDS config server
+            RATE_LIMITER_LABEL: Default
+            CONFIG_GRPC_XDS_SERVER_URL: localhost:18001
+            CONFIG_GRPC_XDS_SERVER_USE_TLS: true
+            CONFIG_GRPC_XDS_CLIENT_TLS_KEY: /home/wso2/security/keystore/ratelimiter.key
+            CONFIG_GRPC_XDS_CLIENT_TLS_CERT: /home/wso2/security/keystore/ratelimiter.crt
+            CONFIG_GRPC_XDS_SERVER_TLS_CACERT: /home/wso2/security/keystore/ca.crt
+            CONFIG_GRPC_XDS_SERVER_TLS_SAN: localhost
+          readinessProbe:
+            path: /healthcheck
+            port: 8090
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            failureThreshold: 5
+          livenessProbe:
+            path: /healthcheck
+            port: 8090
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            failureThreshold: 5
+          strategy: Recreate
+          replicas: 1
+          imagePullPolicy: IfNotPresent
+          image: ratelimiter:0.0.1-SNAPSHOT
+          security:
+            sslHostname: "ratelimiter"
+        # configs:
         #   tls:
-        #     certificatesSecret: "adapter-cert"
+        #     certificatesSecret: "ratelimiter-cert"
         #     certKeyFilename: ""
         #     certFilename: ""
+        #     certCAFilename: ""
       gatewayRuntime:
         appName: "router"
         deployment:
@@ -320,7 +399,12 @@ wso2:
             #     certKeyFilename: ""
             #     certFilename: ""
 
+certmanager:
+  enabled: true
+  enableClusterIssuer: true
+  enableRootCa: true
 postgresql:
+  enabled: true
   fullnameOverride: "wso2apk-db-service"
   auth:
     database: WSO2AM_DB
@@ -417,3 +501,15 @@ idp:
     configs:
       idpLoginUrl: "https://idp.am.wso2.com:9095/commonauth/login"
       idpAuthCallBackUrl: "https://idp.am.wso2.com:9095/oauth2/auth-callback"
+redis:
+  enabled: false
+  architecture: standalone
+  fullnameOverride: redis
+  primary:
+    service:
+      ports:
+        redis: 6379
+  auth:
+    enabled: false
+  image:
+    debug: true
