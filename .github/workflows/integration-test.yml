@@ -24,31 +24,18 @@ jobs:
     - name: Check for file changes
       id: check-changes
       run: |
-        echo "::set-output name=adapter-changed::$(git diff --name-only HEAD^..HEAD -- /adapter != '')"
-        echo "::set-output name=common-bal-changed::$(git diff --name-only HEAD^..HEAD -- /common-bal-libs != '')"
-        echo "::set-output name=common-gradle-changed::$(git diff --name-only HEAD^..HEAD -- /common-gradle-scripts != '')"
-        echo "::set-output name=enforcer-changed::$(git diff --name-only HEAD^..HEAD -- /gateway/enforcer != '')"
-        echo "::set-output name=router-changed::$(git diff --name-only HEAD^..HEAD -- /gateway/router != '')"
-        echo "::set-output name=helm-changed::$(git diff --name-only HEAD^..HEAD -- /helm-charts != '')"
-        echo "::set-output name=idp-ds-changed::$(git diff --name-only HEAD^..HEAD -- /idp/idp-domain-service != '')"
-        echo "::set-output name=idp-ui-changed::$(git diff --name-only HEAD^..HEAD -- /idp/idp-ui != '')"
-        echo "::set-output name=ratelimitter-changed::$(git diff --name-only HEAD^..HEAD -- /ratelimiter != '')"
-        echo "::set-output name=config-ds-changed::$(git diff --name-only HEAD^..HEAD -- /runtime/config-deployer-service != '')"
-        echo "::set-output name=runtime-ds-changed::$(git diff --name-only HEAD^..HEAD -- /runtime/runtime-domain-service != '')"
-        echo "::set-output name=test-changed::$(git diff --name-only HEAD^..HEAD -- /test != '')"
-    outputs:
-      adapter-changed: ${{ steps.check-changes.outputs.adapter-changed }}
-      common-bal-changed: ${{ steps.check-changes.outputs.common-bal-changed }}
-      common-gradle-changed: ${{ steps.check-changes.outputs.common-gradle-changed }}
-      enforcer-changed: ${{ steps.check-changes.outputs.enforcer-changed }}
-      router-changed: ${{ steps.check-changes.outputs.router-changed }}
-      helm-changed: ${{ steps.check-changes.outputs.helm-changed }}
-      idp-ds-changed: ${{ steps.check-changes.outputs.idp-ds-changed }}
-      idp-ui-changed: ${{ steps.check-changes.outputs.idp-ui-changed }}
-      ratelimitter-changed: ${{ steps.check-changes.outputs.ratelimitter-changed }}
-      config-ds-changed: ${{ steps.check-changes.outputs.config-ds-changed }}
-      runtime-ds-changed: ${{ steps.check-changes.outputs.runtime-ds-changed }}
-      test-changed: ${{ steps.check-changes.outputs.test-changed }}
+        echo "{adapter-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /adapter != '')" >> $GITHUB_OUTPUT
+        echo "{common-bal-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /common-bal-libs != '')" >> $GITHUB_OUTPUT
+        echo "{common-gradle-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /common-gradle-scripts != '')" >> $GITHUB_OUTPUT
+        echo "{enforcer-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /gateway/enforcer != '')" >> $GITHUB_OUTPUT
+        echo "{router-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /gateway/router != '')" >> $GITHUB_OUTPUT
+        echo "{helm-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /helm-charts != '')" >> $GITHUB_OUTPUT
+        echo "{idp-ds-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /idp/idp-domain-service != '')" >> $GITHUB_OUTPUT
+        echo "{idp-ui-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /idp/idp-ui != '')" >> $GITHUB_OUTPUT
+        echo "{ratelimitter-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /ratelimiter != '')" >> $GITHUB_OUTPUT
+        echo "{config-ds-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /runtime/config-deployer-service != '')" >> $GITHUB_OUTPUT
+        echo "{runtime-ds-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /runtime/runtime-domain-service != '')" >> $GITHUB_OUTPUT
+        echo "{test-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /test != '')" >> $GITHUB_OUTPUT
   build_adapter:
     needs: check_changes
     if: github.event_name == 'pull_request_target' && needs.check_changes.outputs.adapter-changed == 'true' && (github.event.action == 'opened' || github.event.action == 'synchronize') 
