@@ -3,13 +3,55 @@ on:
   workflow_dispatch:
   pull_request_target:
     types: [opened, synchronize, reopened]
+    paths-ignore: 
+      - '**/logo/**'
+      - '**/choreo-build/**'
+      - '/database/postgres/**'
+      - '/runtime/runtime-ui/**'
+      - '/samples/**'
+      - '/developer/**'
 concurrency: 
   group: integration-test-${{ github.event.number || github.run_id }}
 env:
   GH_TOKEN: ${{ secrets.WSO2_BOT_TOKEN }}  
 jobs:
-  build_adapter:
+  check_changes:
+    runs-on: ubuntu-latest
     if: github.event_name == 'pull_request_target' && github.event.action == 'opened' || github.event.action == 'synchronize'
+    steps:
+    - name: Checkout apk-repo
+      uses: actions/checkout@v3
+    - name: Check for file changes
+      id: check-changes
+      run: |
+        echo "::set-output name=adapter-changed::$(git diff --name-only HEAD^..HEAD -- /adapter != '')"
+        echo "::set-output name=common-bal-changed::$(git diff --name-only HEAD^..HEAD -- /common-bal-libs != '')"
+        echo "::set-output name=common-gradle-changed::$(git diff --name-only HEAD^..HEAD -- /common-gradle-scripts != '')"
+        echo "::set-output name=enforcer-changed::$(git diff --name-only HEAD^..HEAD -- /gateway/enforcer != '')"
+        echo "::set-output name=router-changed::$(git diff --name-only HEAD^..HEAD -- /gateway/router != '')"
+        echo "::set-output name=helm-changed::$(git diff --name-only HEAD^..HEAD -- /helm-charts != '')"
+        echo "::set-output name=idp-ds-changed::$(git diff --name-only HEAD^..HEAD -- /idp/idp-domain-service != '')"
+        echo "::set-output name=idp-ui-changed::$(git diff --name-only HEAD^..HEAD -- /idp/idp-ui != '')"
+        echo "::set-output name=ratelimitter-changed::$(git diff --name-only HEAD^..HEAD -- /ratelimiter != '')"
+        echo "::set-output name=config-ds-changed::$(git diff --name-only HEAD^..HEAD -- /runtime/config-deployer-service != '')"
+        echo "::set-output name=runtime-ds-changed::$(git diff --name-only HEAD^..HEAD -- /runtime/runtime-domain-service != '')"
+        echo "::set-output name=test-changed::$(git diff --name-only HEAD^..HEAD -- /test != '')"
+    outputs:
+      adapter-changed: ${{ steps.check-changes.outputs.adapter-changed }}
+      common-bal-changed: ${{ steps.check-changes.outputs.common-bal-changed }}
+      common-gradle-changed: ${{ steps.check-changes.outputs.common-gradle-changed }}
+      enforcer-changed: ${{ steps.check-changes.outputs.enforcer-changed }}
+      router-changed: ${{ steps.check-changes.outputs.router-changed }}
+      helm-changed: ${{ steps.check-changes.outputs.helm-changed }}
+      idp-ds-changed: ${{ steps.check-changes.outputs.idp-ds-changed }}
+      idp-ui-changed: ${{ steps.check-changes.outputs.idp-ui-changed }}
+      ratelimitter-changed: ${{ steps.check-changes.outputs.ratelimitter-changed }}
+      config-ds-changed: ${{ steps.check-changes.outputs.config-ds-changed }}
+      runtime-ds-changed: ${{ steps.check-changes.outputs.runtime-ds-changed }}
+      test-changed: ${{ steps.check-changes.outputs.test-changed }}
+  build_adapter:
+    needs: check_changes
+    if: github.event_name == 'pull_request_target' && needs.check_changes.outputs.adapter-changed == 'true' && (github.event.action == 'opened' || github.event.action == 'synchronize') 
     uses: ./.github/workflows/adapter-release.yml
     with:
       aks_deployment: true
@@ -21,7 +63,8 @@ jobs:
       AZURE_ACR_NAME: ${{ secrets.AZURE_ACR_NAME }}
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
   build_enforcer:
-    if: github.event_name == 'pull_request_target' && github.event.action == 'opened' || github.event.action == 'synchronize'
+    needs: check_changes
+    if: github.event_name == 'pull_request_target' && needs.check_changes.outputs.enforcer-changed=='true' && ( github.event.action == 'opened' || github.event.action == 'synchronize')
     uses: ./.github/workflows/enforcer-release.yml
     with:
       aks_deployment: true
@@ -33,20 +76,22 @@ jobs:
       AZURE_ACR_NAME: ${{ secrets.AZURE_ACR_NAME }}
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
     
-  # build_router:
-    # if: github.event_name == 'pull_request_target' && github.event.action == 'opened' || github.event.action == 'synchronize'
-    # uses: ./.github/workflows/router-release.yml
-  #   with:
-  #     aks_deployment: true
-  #   secrets:
-  #     WSO2_BOT_TOKEN: ${{ secrets.WSO2_BOT_TOKEN }}
-  #     WSO2_BOT_USER: ${{ secrets.WSO2_BOT_USER }}
-  #     WSO2_BOT_EMAIL: ${{ secrets.WSO2_BOT_EMAIL }}
-  #     DOCKER_ORGANIZATION: ${{ secrets.AZURE_ACR_NAME }}.azurecr.io
-  #     AZURE_ACR_NAME: ${{ secrets.AZURE_ACR_NAME }}
-  #     AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+  build_router:
+    needs: check_changes
+    if: github.event_name == 'pull_request_target' && needs.check_changes.outputs.router-changed=='true' && (github.event.action == 'opened' || github.event.action == 'synchronize')
+    uses: ./.github/workflows/router-release.yml
+    with:
+      aks_deployment: true
+    secrets:
+      WSO2_BOT_TOKEN: ${{ secrets.WSO2_BOT_TOKEN }}
+      WSO2_BOT_USER: ${{ secrets.WSO2_BOT_USER }}
+      WSO2_BOT_EMAIL: ${{ secrets.WSO2_BOT_EMAIL }}
+      DOCKER_ORGANIZATION: ${{ secrets.AZURE_ACR_NAME }}.azurecr.io
+      AZURE_ACR_NAME: ${{ secrets.AZURE_ACR_NAME }}
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
   build_runtime:
-    if: github.event_name == 'pull_request_target' && github.event.action == 'opened' || github.event.action == 'synchronize'
+    needs: check_changes
+    if: github.event_name == 'pull_request_target' && needs.check_changes.outputs.runtime-ds-changed=='true' && (github.event.action == 'opened' || github.event.action == 'synchronize')
     uses: ./.github/workflows/runtime-release.yml
     with:
       aks_deployment: true
@@ -58,7 +103,8 @@ jobs:
       AZURE_ACR_NAME: ${{ secrets.AZURE_ACR_NAME }}
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
   build_config:
-    if: github.event_name == 'pull_request_target' && github.event.action == 'opened' || github.event.action == 'synchronize'
+    needs: check_changes
+    if: github.event_name == 'pull_request_target' && needs.check_changes.outputs.config-ds-changed=='true'  && (github.event.action == 'opened' || github.event.action == 'synchronize')
     uses: ./.github/workflows/config-deployer-release.yml
     with:
       aks_deployment: true
@@ -70,7 +116,8 @@ jobs:
       AZURE_ACR_NAME: ${{ secrets.AZURE_ACR_NAME }}
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}      
   build_idpds:
-    if: github.event_name == 'pull_request_target' && github.event.action == 'opened' || github.event.action == 'synchronize'
+    needs: check_changes
+    if: github.event_name == 'pull_request_target' && needs.check_changes.outputs.idp-ds-changed=='true'  && (github.event.action == 'opened' || github.event.action == 'synchronize')
     uses: ./.github/workflows/idp-domain-service-release.yml
     with:
       aks_deployment: true
@@ -82,7 +129,8 @@ jobs:
       AZURE_ACR_NAME: ${{ secrets.AZURE_ACR_NAME }}
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
   build_idpui:
-    if: github.event_name == 'pull_request_target' && github.event.action == 'opened' || github.event.action == 'synchronize'
+    needs: check_changes
+    if: github.event_name == 'pull_request_target' && needs.check_changes.outputs.idp-ui-changed=='true'  && (github.event.action == 'opened' || github.event.action == 'synchronize')
     uses: ./.github/workflows/idp-ui-release.yml
     with:
       aks_deployment: true
@@ -93,10 +141,23 @@ jobs:
       DOCKER_ORGANIZATION: ${{ secrets.AZURE_ACR_NAME }}.azurecr.io
       AZURE_ACR_NAME: ${{ secrets.AZURE_ACR_NAME }}
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-
+  build_ratelimiter:
+    needs: check_changes
+    if: github.event_name == 'pull_request_target' && needs.check_changes.outputs.ratelimitter-changed=='true'  && (github.event.action == 'opened' || github.event.action == 'synchronize')
+    uses: ./.github/workflows/ratelimiter-release.yml
+    with:
+      aks_deployment: true
+    secrets:
+      WSO2_BOT_TOKEN: ${{ secrets.WSO2_BOT_TOKEN }}
+      WSO2_BOT_USER: ${{ secrets.WSO2_BOT_USER }}
+      WSO2_BOT_EMAIL: ${{ secrets.WSO2_BOT_EMAIL }}
+      DOCKER_ORGANIZATION: ${{ secrets.AZURE_ACR_NAME }}.azurecr.io
+      AZURE_ACR_NAME: ${{ secrets.AZURE_ACR_NAME }}
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+    
   runs_integration_tests_on_pull_request_target:
     if: github.event_name == 'pull_request_target' && github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.action == 'reopened'
-    needs: [build_adapter, build_enforcer, build_runtime, build_idpds, build_idpui,build_config]
+    needs: [build_adapter, build_enforcer, build_runtime, build_idpds, build_idpui,build_config,build_ratelimiter]
     runs-on: ubuntu-latest
     steps:
     - uses: azure/login@v1
@@ -205,7 +266,7 @@ jobs:
 
   runs_go_integration_tests_on_pull_request_target:
     if: github.event_name == 'pull_request_target' && github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.action == 'reopened'
-    needs: [build_adapter, build_enforcer]
+    needs: [build_adapter, build_enforcer,build_ratelimiter]
     runs-on: ubuntu-latest
     steps:
     - uses: azure/login@v1
