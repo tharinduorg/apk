@@ -24,18 +24,18 @@ jobs:
     - name: Check for file changes
       id: check-changes
       run: |
-        echo "{adapter-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /adapter != '')" >> $GITHUB_OUTPUT
-        echo "{common-bal-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /common-bal-libs != '')" >> $GITHUB_OUTPUT
-        echo "{common-gradle-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /common-gradle-scripts != '')" >> $GITHUB_OUTPUT
-        echo "{enforcer-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /gateway/enforcer != '')" >> $GITHUB_OUTPUT
-        echo "{router-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /gateway/router != '')" >> $GITHUB_OUTPUT
-        echo "{helm-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /helm-charts != '')" >> $GITHUB_OUTPUT
-        echo "{idp-ds-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /idp/idp-domain-service != '')" >> $GITHUB_OUTPUT
-        echo "{idp-ui-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /idp/idp-ui != '')" >> $GITHUB_OUTPUT
-        echo "{ratelimitter-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /ratelimiter != '')" >> $GITHUB_OUTPUT
-        echo "{config-ds-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /runtime/config-deployer-service != '')" >> $GITHUB_OUTPUT
-        echo "{runtime-ds-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /runtime/runtime-domain-service != '')" >> $GITHUB_OUTPUT
-        echo "{test-changed}=$(git diff --name-only ${{ github.event.before }}..${{ github.event.after }} -- /test != '')" >> $GITHUB_OUTPUT
+        echo "{adapter-changed}=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }}) -- /adapter != '')" >> $GITHUB_OUTPUT
+        echo "{common-bal-changed}=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }}) -- /common-bal-libs != '')" >> $GITHUB_OUTPUT
+        echo "{common-gradle-changed}=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }}) -- /common-gradle-scripts != '')" >> $GITHUB_OUTPUT
+        echo "{enforcer-changed}=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }}) -- /gateway/enforcer != '')" >> $GITHUB_OUTPUT
+        echo "{router-changed}=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }}) -- /gateway/router != '')" >> $GITHUB_OUTPUT
+        echo "{helm-changed}=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }}) -- /helm-charts != '')" >> $GITHUB_OUTPUT
+        echo "{idp-ds-changed}=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }}) -- /idp/idp-domain-service != '')" >> $GITHUB_OUTPUT
+        echo "{idp-ui-changed}=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }}) -- /idp/idp-ui != '')" >> $GITHUB_OUTPUT
+        echo "{ratelimitter-changed}=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }}) -- /ratelimiter != '')" >> $GITHUB_OUTPUT
+        echo "{config-ds-changed}=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }}) -- /runtime/config-deployer-service != '')" >> $GITHUB_OUTPUT
+        echo "{runtime-ds-changed}=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }}) -- /runtime/runtime-domain-service != '')" >> $GITHUB_OUTPUT
+        echo "{test-changed}=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }}) -- /test != '')" >> $GITHUB_OUTPUT
   build_adapter:
     needs: check_changes
     if: github.event_name == 'pull_request_target' && needs.check_changes.outputs.adapter-changed == 'true' && (github.event.action == 'opened' || github.event.action == 'synchronize') 
