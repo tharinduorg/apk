@@ -186,3 +186,4 @@ powermock = "2.0.2"
 xml-apis = "1.4.01"
 # Plugins
 openapi-generator-plugin = "6.2.1"
+
