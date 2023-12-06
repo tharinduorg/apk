@@ -14,12 +14,7 @@ The following should be installed in your dev machine.
 
 ## Setting up
 
-1. Clone the `wso2/apk` repository and navigate into adapter directory in home directory of the cloned tree.
 
-    ```bash
-    git clone https://github.com/wso2/apk.git
-    cd adapter
-    ```
 
 2. Check whether you can build the project without running into any issues.
 
