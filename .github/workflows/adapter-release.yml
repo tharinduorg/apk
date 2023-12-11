@@ -72,7 +72,7 @@ jobs:
           git checkout -b adapter-${{github.event.inputs.release_version}}
           git push origin adapter-${{github.event.inputs.release_version}}
           cd adapter
-          ./gradlew release -Prelease.useAutomaticVersion=true -Pdocker_organization=${{ secrets.DOCKER_ORGANIZATION }} -Pdocker_username=${{ secrets.DOCKER_USERNAME }} -Pdocker_password=${{ secrets.DOCKER_PASSWORD }} -Prelease.releaseVersion=${{ github.event.inputs.release_version }} -Prelease.newVersion=${{ github.event.inputs.next_version }} -PmultiArch=true -PrequireBranch=adapter-${{github.event.inputs.release_version}}
+          ./gradlew release -Prelease.useAutomaticVersion=true -Pdocker_organization=${{ secrets.DOCKER_ORGANIZATION }} -Pdocker_username=${{ secrets.DOCKER_USERNAME }} -Pdocker_password=${{ secrets.DOCKER_PASSWORD }} -Prelease.releaseVersion=${{ github.event.inputs.release_version }} -Prelease.newVersion=${{ github.event.inputs.next_version }} -PmultiArch=true -Prelease.requireBranch=adapter-${{github.event.inputs.release_version}}
       - name: Run Gradle Build
         run: |
           cd apk-repo/adapter
