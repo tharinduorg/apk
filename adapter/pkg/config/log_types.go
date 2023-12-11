@@ -53,6 +53,7 @@ type LogConfig struct {
 	WireLogs   *wireLogs
 }
 
+// getDefaultLogConfig returns the default log configuration.
 func getDefaultLogConfig() *LogConfig {
 	adapterLogConfig = &LogConfig{
 		Logfile:   "/dev/null",
