@@ -177,6 +177,7 @@ sh build-apk.sh
 
 ### Build single component
 
+
 For example: building Runtime Domain Service
 ```bash
 cd runtime/runtime-domain-service
